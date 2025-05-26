@@ -156,7 +156,10 @@ main{
 }
 
 .banner-and-daily-goods{
+	display: flex;
 	padding: 70px 250px;
+	gap:80px;
+	justify-content: space-between;
 }
 
 .banner {
@@ -180,7 +183,7 @@ main{
 	padding: 0;
 	z-index: 2;
 	transition: opacity 0.3s;
-	transition: filter 0.1s;
+	transition: filter 0.2s;
 	height: 50px;
 	width: 50px;
 	opacity: 50%;
@@ -205,6 +208,169 @@ main{
 	right: 20px;
 }
 
+.daily-good{
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+	width:370px;
+	border-radius: 10px;
+	position: relative;
+	align-items: center;
+	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
+              0px 4px 6px -2px rgba(0, 0, 0, 0.05);
+	padding: 12px 30px 0px 30px;
+}
+
+.daily-good-span{
+	font-weight: bold;
+	color: #000;
+	font-size: 24px;
+	margin-bottom: 10px;
+}
+.daily-good-description-cart{
+	display:inline-flex;
+	justify-content: space-between;
+	width: 100%;
+}
+.daily-good-description{
+	display: flex;
+	flex-direction: column;
+	text-decoration: none;
+}
+
+.daily-good-name{
+	font-weight: lighter;
+	color: #181818;
+	font-size: 18px;
+}
+
+.price{
+	display: flex;
+}
+
+.actual-price{
+	font-weight: bold;
+	color: #ff0000;
+	font-size: 30px;
+}
+
+.old-price{
+	color: #525252;
+	font-size: 14px;
+	text-decoration: line-through;
+}
+
+.daily-good-add-to-cart{
+	border: none;
+	padding: 0;
+	background-color: transparent;
+}
+
+.daily-good-btn{
+	position: absolute;
+	color: #000;
+	background-color: transparent;
+	padding: 0;
+	height: 38px;
+	font-size: 32px;
+	border: 0;
+	top: 150px;
+	cursor: pointer;
+	transition: transform 0.1s ease;
+}
+
+.daily-good-btn:hover{
+	transform: scale(1.2);
+}
+
+.daily-good-btn-right{
+	right: 20px;
+}
+.daily-good-btn-left{
+	left: 20px;
+}
+.catalog{
+	padding: 30px 250px 0 250px;
+	display: flex;
+	flex-wrap: wrap;
+    gap: 17px;
+    justify-content:flex-start
+}
+.card{
+    margin-bottom: 20px;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background-color: white;
+	width:220px;
+	border-radius: 10px;
+	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                0px 4px 6px -2px rgba(0, 0, 0, 0.05);
+	transition: transform 0.1s ease;
+}
+
+.card:hover{
+	transform: scale(1.03);
+}
+
+.card-good-name{
+	font-weight: lighter;
+	color: #181818;
+	font-size: 18px;
+	padding: 5px 5px 0px 5px;
+}
+.card-price-buttons{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 5px 15px 0 10px;
+	margin-bottom: 10px;
+}
+
+.card-price{
+	display: flex;
+	flex-direction: column;
+}
+.card-actual-price{
+	font-weight: bold;
+	font-size: 20px;
+	color: #000;
+}
+
+.card-old-price{
+	color: #525252;
+	font-size: 14px;
+	text-decoration: line-through;
+}
+
+.card-buttons{
+	display:flex;
+	gap:10px
+}
+
+.card-buttons button{
+	background-color: transparent;
+	border: 0;
+	cursor: pointer;
+	padding: 0;
+	height: 30px;
+}
+
+.card-discount{
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	border-radius: 5px;
+	min-width: 49px;
+	height: 29px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #FF0000;
+	font-weight: 400;
+	font-size: 14px;
+	background-color: #FFD9D9;
+}
 
 footer{
 	display: block;
