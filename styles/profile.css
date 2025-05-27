@@ -1,6 +1,7 @@
 *{
 	font-family: 'Roboto';
 	color: #f5f5f5;
+
 }
 body{
 	background-color: #181818;
@@ -152,113 +153,148 @@ main{
 	width: 100%;
 	max-width: 1920px;
 	border-radius: 20px;
-	flex: 1;
+}
+.profile-info{
+	margin-bottom:45px ;
 }
 
-.cart-page{
-	padding: 60px 250px 0 250px;
+.profile-page{
+	padding: 60px 470px;
+}
+
+
+.welcome-span, .orders-history-span{
+	font-weight: bold;
+	font-size: 40px;
+	color: #000;
+}
+
+.info-tablet{
 	display: flex;
-	justify-content: space-between;
-	position: relative;
-}
-
-.cart-list{
-	width: 100%;
-}
-
-.cart-list-manipulations{
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	flex-direction: column;
 	background-color: white;
 	border-radius: 10px;
 	position: relative;
 	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
                 0px 4px 6px -2px rgba(0, 0, 0, 0.05);
-	height: 60px;
+	height: 100%;
 	width: 100%;
-	padding: 0 20px;
+	padding: 40px 70px;
+	max-width: 980px;
+	margin-bottom: 30px;
+	margin-top: 35px;
+	box-sizing: border-box;
+	gap: 15px;
+	position: relative;
+}
+
+.info-tablet div{
+	display: flex;
+	gap:5px;
+}
+
+.info-tablet div span{
+	font-weight: bold;
+	font-size: 20px;
+	color:#848484;
+}
+
+.info-tablet div .value{
+	font-weight: 400;
+	font-size: 20px;
+	color:#848484;
+}
+
+.buttons{
+	display: flex;
+	gap:40px;
+	position: absolute;
+	right: 30px;
+	bottom: 40px;
+}
+
+.change-info-btn, .delete-account-btn{
+	background-color: transparent;
+	border: none;
+	color: #848484;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+.delete-account-btn{
+	color: #FF0000;
+}
+
+.orders-history{
+	padding-top: 40px;
+}
+
+.orders-list{
+	width: 100%;
+}
+
+.orders-history-list{
+	margin-top: 40px;
+}
+
+.order-cart{
+	display: flex;
+	background-color: white;
+	border-radius: 10px;
+	position: relative;
+	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
+                0px 4px 6px -2px rgba(0, 0, 0, 0.05);
+	width: 100%;
 	max-width: 970px;
 	margin-bottom: 30px;
 	box-sizing: border-box;
 }
 
-.checkbox{
+.order-info{
 	display: flex;
-	align-items: center;
-	gap: 10px;
+	flex-direction: column;
+	font-size: 18px;
+	margin-top: 15px;
 }
 
-.check-all{
+.order-date{
 	font-weight: 400;
-	color: #000;
-	font-size: 14px;
+	color: #848484;
 }
 
-.remove-checked{
+.order-name{
+	font-weight: bold;
+	color: #000;
+}
+
+.rate{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top:73px;
+}
+
+.rate button{
 	border: none;
 	background-color: transparent;
-	color: #ff0000;
+	cursor: pointer;
 }
 
-.make-order{
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	background-color: white;
-	width:370px;
-	border-radius: 10px;
-	align-items: center;
-	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
-                0px 4px 6px -2px rgba(0, 0, 0, 0.05);
-	padding: 30px 40px;
-	position: fixed;
-	top: 130px;
-	right: 250px;
-	box-sizing: border-box;
-}
-
-.bill{
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-
-}
-.bill div{
-	display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: baseline;
-    gap: 10px;
-	margin-bottom: 10px;
-}
-
-.bill div span{
-	font-size: 24px;
-	color: black;
-}
-
-.bill div .dots{
-	border-bottom: 2px dotted #aaa;
-    height: 0.5em;
-}
-
-.final-price{
-	margin-top: 10px;
-}
-
-.final-price .span, .final-price .price{
+.rate-span{
 	font-weight: bold;
-	font-size: 26px;
+	font-size: 14px;
+	color: #000;
 }
 
-.make-order-btn{
-	background-color: #54C758;
-	border: none;
-	width: 100%;
-	border-radius: 10px;
-	height: 50px;
+.price{
+	position: absolute;
+	font-weight: bold;
 	font-size: 20px;
+	color: #000;
+	top:15px;
+	right: 20px;
 }
+
 
 
 .cart-card{
@@ -285,7 +321,6 @@ main{
 	position: absolute;
 	top:15px;
 	right: 15px;
-	align-items: flex-end;
 }
 
 .actual-price{
