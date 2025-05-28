@@ -95,6 +95,30 @@ header{
 	color: #f5f5f5;
 }
 
+.category-drop-down{
+	position: relative;
+}
+
+.dropdown-menu{
+	background-color: white;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	box-shadow: 0px 10px 15px -3px rgba(0, 0, 0, 0.1), 
+	0px 4px 6px -2px rgba(0, 0, 0, 0.05);
+	padding: 5px;
+	z-index: 1000;
+	visibility: hidden;
+}
+
+.dropdown-menu a{
+	font-size: 14px;
+	text-decoration: none;
+	color: #000;
+	margin: 5px;
+}
+
 .action-icons{
 	display: flex;
 	gap: 30px;
