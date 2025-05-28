@@ -210,7 +210,10 @@ main{
 }
 
 .good-attributes{
-	width: 400px;
+	width: 350px;
+	display: flex;
+	flex-direction: column;
+	gap:15px;
 }
 
 .good-attributes span{
@@ -400,7 +403,6 @@ hr {
 	background: #888888;
 	max-width: 1420px;
 	min-width: 500px;
-	width: 100%;
 	margin-top: 25px;
 	margin-left: 250px;
 	margin-right: 250px;
@@ -410,7 +412,7 @@ hr {
 	display:flex;
 	gap:140px;
 	justify-content: space-between;
-	width: 1120px;
+	max-width: 1120px;
 	height: 278px;
 	margin-top: 25px;
 	margin-left: 400px;
