@@ -58,7 +58,7 @@
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
-				<a href="discount.html">Скидки</a>
+				<a href="discount.php">Скидки</a>
 				<div onclick="showCategories()" class="category-drop-down" id="categoryDropdownTrigger">
 					<span>Категории</span>
 					<div class="dropdown-menu" id="dropdown">

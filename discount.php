@@ -22,14 +22,8 @@
 		$favItems = $stmt->fetchAll(PDO::FETCH_COLUMN);
 	}
 
-	$stmt = $pdo->prepare("
-		SELECT p.* 
-		FROM favorites f
-		JOIN products p ON f.product_id = p.id
-		WHERE f.user_id = ?
-	");
-	$stmt->execute([$userId]);
-	$favorites = $stmt->fetchAll();
+	$stmt = $pdo->query("SELECT * FROM products WHERE discount_percent > 0");
+	$discountedProducts = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -37,7 +31,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="styles/favorites.css">
+	<link rel="stylesheet" href="styles/search-discount.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
@@ -49,7 +43,7 @@
 				<span class="logo-text">CYBERZONE</span>
 			</a>
 		</div>
-		<form action="search.html" class="search-container">
+		<form  action="search.html" class="search-container">
 			<input type="text" class="search-input" placeholder="Поиск...">
 			<button class="search-button" type="submit">
 				<img src="img/icons/search.png" height="20" alt="Поиск">
@@ -57,7 +51,7 @@
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
-				<a href="discount.php">Скидки</a>
+				<a href="#">Скидки</a>
 				<div onclick="showCategories()" class="category-drop-down" id="categoryDropdownTrigger">
 					<span>Категории</span>
 					<div class="dropdown-menu" id="dropdown">
@@ -71,7 +65,7 @@
 			</div>
 			<div class="action-icons">
 				<div class="favorites-logo">
-					<a href="#">
+					<a href="favorites.php">
 						<img src="img/icons/heart_white.png" height="30px">
 					</a>
 				</div>
@@ -95,67 +89,41 @@
 
 
 	<main>
-		<h1 class="favorites-span">Избранные товары</h1>
-		<!-- <div class="catalog">
-			<div class="card">
-				<a href="goodPage.html">
-					<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-					<span class="card-good-name">Мышь игровая Logi</span>
-				</a>
-				
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-		</div> -->
+		<h1 class="favorites-span">Товары со скидкой</h1>
 		<div class="catalog">
-    <?php foreach ($favorites as $product): ?>
-        <?php
-            $discountedPrice = $product['price'] * (1 - $product['discount_percent'] / 100);
-        ?>
-        <div class="card" data-id="<?= $product['id'] ?>">
-            <a href="goodPage.php?id=<?= $product['id'] ?>">
-                <img src="<?= $product['image_path'] ?>" height="220px">
-                <span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
-            </a>
-
-            <div class="card-price-buttons">
-                <div class="card-price">
-                    <span class="card-actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
-                    <?php if ($product['discount_percent'] > 0): ?>
-                        <span class="card-old-price"><?= number_format($product['price'], 0, '', ' ') ?> р.</span>
-                    <?php else: ?>
-                        &nbsp;
-                    <?php endif; ?>
-                </div>
-                <?php
-					$isInCart = in_array($product['id'], $cartItems);
-					$isInFav = in_array($product['id'], $favItems);
+			<?php foreach ($discountedProducts as $product): ?>
+				<?php
+					$discount = $product['discount_percent'];
+					$oldPrice = $product['price'];
+					$discountedPrice = $oldPrice * (1 - $discount / 100);
 				?>
-				<div class="card-buttons">
-					<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
-						<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
-					</button>
-					<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
-						<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
-					</button>
+				<div class="card">
+					<a href="goodPage.php?id=<?= $product['id'] ?>">
+						<img src="<?= $product['image_path'] ?>" height="220px">
+						<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
+					</a>
+					<div class="card-price-buttons">
+						<div class="card-price">
+							<span class="card-actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
+							<span class="card-old-price"><?= number_format($oldPrice, 0, '', ' ') ?> р.</span>
+						</div>
+						<?php
+						$isInCart = in_array($product['id'], $cartItems);
+						$isInFav = in_array($product['id'], $favItems);
+						?>
+						<div class="card-buttons">
+							<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+								<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
+							</button>
+							<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+								<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
+							</button>
+						</div>
+					</div>
+					<span class="card-discount">-<?= $discount ?>%</span>
 				</div>
-            </div>
-
-            <?php if ($product['discount_percent'] > 0): ?>
-                <span class="card-discount">-<?= $product['discount_percent'] ?>%</span>
-            <?php endif; ?>
-        </div>
-    <?php endforeach; ?>
-</div>
+			<?php endforeach; ?>
+		</div>
 	</main>
 
 
@@ -223,6 +191,6 @@
 		</div>
 	</footer>
 	<script src="js/showCategories.js"></script>
-	<script src="js/deleteFavsFromFavs.js"></script>
+	<script src="js/actions.js"></script>
 </body>
 </html>
