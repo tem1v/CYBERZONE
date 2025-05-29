@@ -1,16 +1,14 @@
 <?php
 	include 'server/db/db.php';
-    session_start();
+	session_start();
 	$isLoggedIn = isset($_SESSION['user_id']);
 	$userId = $_SESSION['user_id'] ?? null;
-	$products = [];
-
-	if ($query = $pdo->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 12")) {
-    	$products = $query->fetchAll(PDO::FETCH_ASSOC);
-	} else {
-		print_r($pdo->errorInfo());
+	// Проверка наличия ID
+	if (!isset($_GET['id'])) {
+		echo "Товар не найден.";
+		exit;
 	}
-	
+
 	$categories = [];
 	$query = $pdo->query("SELECT id, name FROM categories");
 	if ($query) {
@@ -30,6 +28,59 @@
 		$stmt->execute([$userId]);
 		$favItems = $stmt->fetchAll(PDO::FETCH_COLUMN);
 	}
+
+	$id = $_GET['id'];
+
+	// Запрос товара
+	$stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
+	$stmt->execute([$id]);
+	$product = $stmt->fetch();
+
+	if (!$product) {
+		echo "Товар не найден.";
+		exit;
+	}
+
+	$price = (int)$product['price'];
+	$discount = (int)$product['discount_percent'];
+
+	if ($discount > 0) {
+		$discountedPrice = round($price * (1 - $discount / 100));
+	} else {
+		$discountedPrice = $price;
+	}
+
+	$annualInterestRate = 18;
+	$monthlyInterestMultiplier = 1 + ($annualInterestRate / 100);
+	
+	$credit = round(($discountedPrice * $monthlyInterestMultiplier) / 12);
+	$installment = round($discountedPrice / 12);
+
+	$stmt = $pdo->prepare("
+		SELECT r.*, u.first_name 
+		FROM reviews r
+		JOIN users u ON r.user_id = u.id
+		WHERE r.product_id = ?
+		ORDER BY r.created_at DESC
+	");
+	$stmt->execute([$id]);
+	$reviews = $stmt->fetchAll();
+
+	$stmt = $pdo->prepare("SELECT COUNT(*) AS count, AVG(rating) AS avg_rating FROM reviews WHERE product_id = ?");
+	$stmt->execute([$id]);
+	$result = $stmt->fetch();
+
+	$reviewsCount = $result['count'];
+	$avgRating = round($result['avg_rating'], 1);
+
+	function pluralForm($number, $forms) {
+		$number = abs($number) % 100;
+		$n1 = $number % 10;
+		if ($number > 10 && $number < 20) return $forms[2];
+		if ($n1 > 1 && $n1 < 5) return $forms[1];
+		if ($n1 == 1) return $forms[0];
+		return $forms[2];
+	}
 ?>
 
 <!DOCTYPE html>
@@ -37,15 +88,14 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="styles/mainPage.css">
-	<link rel="stylesheet" href="login-component/loginStyle.css">
-	<title>Cyberzone</title>
+	<link rel="stylesheet" href="styles/goodPage.css">
+	<title><?= htmlspecialchars($product['name']) ?></title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
 	<header class="header-container">
 		<div class="logo">
-			<a href="#">
+			<a href="mainPage.php">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
@@ -69,7 +119,6 @@
 						<?php endforeach; ?>
 					</div>
 				</div>
-
 			</div>
 			<?php if (isset($_SESSION['user_id'])): ?>
 				<div class="action-icons">
@@ -101,7 +150,7 @@
 					<div class="cart-logo">
 					<a href="#" class="cart-link" onclick="openLoginModal(event)">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">1</span>
+						<span class="cart-counter">0</span>
 					</a>
 					</div>
 					<div class="account-logo">
@@ -116,91 +165,93 @@
 		
 	</header>
 
-
-
 	<main>
-		<div class="banner-and-daily-goods">
-			<div class="banner">
-				<a href="mainPage.html" class=""><img src="img/banners/banner_3.png" class="banner-img" height="350px" alt="Баннер"></a>
-				<button class="banner-btn banner-btn-left">
-					<
-				</button>
-				<button class="banner-btn banner-btn-right">
-					>
-				</button>
+		<div class="good-info">
+			<div class="name-rate">
+				<h1 class="good-name"><?= htmlspecialchars($product['name']) ?></h1>
+				<div class="good-rate">
+					<div class="stars">
+						<?php for ($i = 1; $i <= 5; $i++): ?>
+							<img src="img/icons/<?php 
+								if ($i <= floor($avgRating)) {
+									echo 'star_yellow';
+								} elseif ($i == floor($avgRating) + 1 && $avgRating - floor($avgRating) >= 0.5) {
+									echo 'star_half';
+								} else {
+									echo 'star_gray';
+								}
+							?>.png" height="15px">
+						<?php endfor; ?>
+					</div>
+					<a class="reviews-number"><?= $reviewsCount ?> <?= pluralForm($reviewsCount, ['отзыв', 'отзыва', 'отзывов']) ?></a>
+				</div>
 			</div>
-			<div class="daily-good">
-				<span class="daily-good-span">Товар дня</span>
-				<a href="goodPage.html">
-					<img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220" class="daily-good-photo">
-				</a>
-				<div class="daily-good-description-cart">
-					<a href = "goodPage.html" class="daily-good-description">
-						<span class="daily-good-name">Кресло игровое Cougar</span>
-						<div class="price">
-							<span class="actual-price">30 000 р.</span>
-							<span class="old-price">60 000 р.</span>
-						</div>
-					</a>
-					<button class="daily-good-add-to-cart">
-						<img src="img/icons/shopping-cart_black.png" height="50px">
-					</button>
-				</div>	
-			</div>
-		</div>
-		<h1>Новинки</h1>
-		<div class="catalog">
-		<?php foreach ($products as $product): ?>
-			<div href="goodPage.php?id=<?= $product['id'] ?>" class="card">
-				<a href="goodPage.php?id=<?= $product['id'] ?>">
-					<img src="<?= $product['image_path'] ?>" height="220px">
-					<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
-				</a>
-
-				
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">
-							<?= number_format(
-								!empty($product['discount_percent']) 
-									? $product['price'] * (1 - $product['discount_percent'] / 100) 
-									: $product['price'], 
-								0, '', ' '
-							) ?> р.
-						</span>
-
-						<span class="card-old-price" style="<?= empty($product['discount_percent']) ? 'text-decoration: none; color: transparent;' : '' ?>">
-							<?php if (!empty($product['discount_percent'])): ?>
-								<?= number_format($product['price'], 0, '', ' ') ?> р.
-							<?php else: ?>
-								&nbsp;
-							<?php endif; ?>
-						</span>
+			<div class="photo-info-price">
+				<div class="good-photo">
+					<img src="<?= $product['image_path'] ?>" height="520px">
+				</div>
+				<div class="good-attributes">
+					<span>Характеристики</span>
+					<div class="brand">
+						<span>Производитель</span>
+						<span class="dots"></span>
+						<span class="brand value"><?= $product['brand'] ?></span>
+					</div>
+					<div class="color">
+						<span>Цвет</span>
+						<span class="dots"></span>
+						<span class="color value"><?= $product['color'] ?></span>
+					</div>
+				</div>
+				<div class="good-price">
+					<div class="price">
+						<span class="actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
+						<?php if ($product['discount_percent'] > 0): ?>
+							<span class="old-price"><?= number_format($price, 0, '', ' ') ?> р.</span>
+						<?php else: ?>
+							&nbsp;
+						<?php endif; ?>
+					</div>
+					<div class="credit-installment">
+						<span class="credit"><b>Кредит</b> от <?= number_format($credit, 0, '', ' ') ?> р/мес</span>
+						<span class="credit"><b>Рассрочка</b> от <?= number_format($installment, 0, '', ' ') ?> р/мес</span>
 					</div>
 					<?php
 						$isInCart = in_array($product['id'], $cartItems);
-						$isInFav = in_array($product['id'], $favItems);
 					?>
-					<div class="card-buttons">
-						<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
-							<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
-						</button>
-						<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
-							<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
-						</button>
-					</div>
+					<button class="add-to-cart-btn" data-id="<?= $product['id'] ?>"><?= $isInCart ? 'Убрать из корзины' : 'Добавить в корзину' ?></button>
 				</div>
-				<?php if (!empty($product['discount_percent'])): ?>
-					<span class="card-discount">-<?= $product['discount_percent'] ?>%</span>
-				<?php endif; ?>
 			</div>
-		<?php endforeach; ?>
-			
+		</div>
+		<div class="reviews-description">
+			<div class="buttons">
+				<button class="description-btn active">Описание</button>
+				<button class="reviews-btn">Отзывы</button>
+			</div>
+			<div class="container">
+				<div class="description-container visible">
+					<span class="description-text"><?= nl2br($product['description']) ?></span>
+				</div>
+				<div class="reviews-container">
+					<?php foreach ($reviews as $review): ?>
+						<div class="review-card">
+							<div class="review-name-data">
+								<span class="user-name"><?= htmlspecialchars($review['first_name']) ?></span>
+								<span class="review-date"><?= date('d.m.Y', strtotime($review['created_at'])) ?></span>
+							</div>
+							<div class="stars">
+								<?php for ($i = 1; $i <= 5; $i++): ?>
+									<img src="img/icons/<?= $i <= $review['rating'] ? 'star_yellow' : 'star_gray' ?>.png" height="15px">
+								<?php endfor; ?>
+							</div>
+							<span class="review-text"><?= nl2br(htmlspecialchars($review['comment'])) ?></span>
+						</div>
+					<?php endforeach; ?>
+				</div>
+
+			</div>
 		</div>
 	</main>
-
-
-
 
 	<footer>
 		<div class="footer-logo-slogan">
@@ -263,8 +314,9 @@
 			</div>
 		</div>
 	</footer>
-	<script src="js/mainPageSlider.js"></script>
+	<script src="js/reviewsDescriptionSwitch.js"></script>
 	<script src="js/showCategories.js"></script>
+	<script src="js/reloadWindow.js"></script>
 	<script src="js/actions.js"></script>
 </body>
 </html>

@@ -56,7 +56,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         img.src = "img/icons/heart_red.png";
                     } else {
                         img.src = "img/icons/heart_black.png";
-                        // Удаляем карточку из DOM, если товар удалён из избранного
                         if (card) {
                             card.remove();
                         }

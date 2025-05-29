@@ -96,26 +96,6 @@
 
 	<main>
 		<h1 class="favorites-span">Избранные товары</h1>
-		<!-- <div class="catalog">
-			<div class="card">
-				<a href="goodPage.html">
-					<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-					<span class="card-good-name">Мышь игровая Logi</span>
-				</a>
-				
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-		</div> -->
 		<div class="catalog">
     <?php foreach ($favorites as $product): ?>
         <?php
