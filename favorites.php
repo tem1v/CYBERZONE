@@ -1,3 +1,37 @@
+<?php
+	include 'server/db/db.php';
+    session_start();
+	$isLoggedIn = isset($_SESSION['user_id']);
+	$userId = $_SESSION['user_id'] ?? null;
+
+	$categories = [];
+	$query = $pdo->query("SELECT id, name FROM categories");
+	if ($query) {
+		$categories = $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	$cartItems = [];
+	$favItems = [];
+
+	if ($userId) {
+		$stmt = $pdo->prepare("SELECT product_id FROM cart_items WHERE user_id = ?");
+		$stmt->execute([$userId]);
+		$cartItems = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+		$stmt = $pdo->prepare("SELECT product_id FROM favorites WHERE user_id = ?");
+		$stmt->execute([$userId]);
+		$favItems = $stmt->fetchAll(PDO::FETCH_COLUMN);
+	}
+
+	$stmt = $pdo->prepare("
+		SELECT p.* 
+		FROM favorites f
+		JOIN products p ON f.product_id = p.id
+		WHERE f.user_id = ?
+	");
+	$stmt->execute([$userId]);
+	$favorites = $stmt->fetchAll();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +44,7 @@
 <body>
 	<header class="header-container">
 		<div class="logo">
-			<a href="#">
+			<a href="mainPage.php">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
@@ -24,33 +58,33 @@
 		<nav class="navigation">
 			<div class="action-words">
 				<a href="discount.html">Скидки</a>
-				<div class="category-drop-down">
+				<div onclick="showCategories()" class="category-drop-down" id="categoryDropdownTrigger">
 					<span>Категории</span>
-					<div class="dropdown-menu">
-						<a href="catalog.html" class="dropdown-item">Мыши</a>
-						<a href="catalog.html" class="dropdown-item">Клавиатуры</a>
-						<a href="catalog.html" class="dropdown-item">Наушники</a>
-						<a href="catalog.html" class="dropdown-item">Кресла</a>
-						<a href="catalog.html" class="dropdown-item">Мониторы</a>
+					<div class="dropdown-menu" id="dropdown">
+						<?php foreach ($categories as $category): ?>
+							<a href="catalog.php?category=<?= $category['id'] ?>" class="dropdown-item">
+								<?= htmlspecialchars($category['name']) ?>
+							</a>
+						<?php endforeach; ?>
 					</div>
 				</div>
 			</div>
 			<div class="action-icons">
 				<div class="favorites-logo">
-					<a href="favorites.html">
+					<a href="#">
 						<img src="img/icons/heart_white.png" height="30px">
 					</a>
 				</div>
 				<div class="cart-logo">
-					<a href="cart.html"" class="cart-link">
+					<a href="cart.php"" class="cart-link">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">1</span>
+						<span class="cart-counter"><?= count($cartItems) ?></span>
 					</a>
 				</div>
 				<div class="account-logo">
-					<a href="profile.html" class="account-link">
+					<a href="profile.php" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
-						<span class="account-name">Артём</span>
+						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
 				</div>
 			</div>
@@ -62,113 +96,66 @@
 
 	<main>
 		<h1 class="favorites-span">Избранные товары</h1>
+		<!-- <div class="catalog">
+			<div class="card">
+				<a href="goodPage.html">
+					<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
+					<span class="card-good-name">Мышь игровая Logi</span>
+				</a>
+				
+				<div class="card-price-buttons">
+					<div class="card-price">
+						<span class="card-actual-price">30 000 р.</span>
+						<span class="card-old-price">60 000 р.</span>
+					</div>
+					<div class="card-buttons">
+						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
+						<button><img src="img/icons/heart_black.png" height="30px"></button>
+					</div>
+				</div>
+				<span class="card-discount">-30%</span>
+			</div>
+		</div> -->
 		<div class="catalog">
-			<a href="goodPage.html" class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_red.png" height="30px"></button>
-					</div>
+    <?php foreach ($favorites as $product): ?>
+        <?php
+            $discountedPrice = $product['price'] * (1 - $product['discount_percent'] / 100);
+        ?>
+        <div class="card" data-id="<?= $product['id'] ?>">
+            <a href="goodPage.php?id=<?= $product['id'] ?>">
+                <img src="<?= $product['image_path'] ?>" height="220px">
+                <span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
+            </a>
+
+            <div class="card-price-buttons">
+                <div class="card-price">
+                    <span class="card-actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
+                    <?php if ($product['discount_percent'] > 0): ?>
+                        <span class="card-old-price"><?= number_format($product['price'], 0, '', ' ') ?> р.</span>
+                    <?php else: ?>
+                        &nbsp;
+                    <?php endif; ?>
+                </div>
+                <?php
+					$isInCart = in_array($product['id'], $cartItems);
+					$isInFav = in_array($product['id'], $favItems);
+				?>
+				<div class="card-buttons">
+					<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+						<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
+					</button>
+					<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+						<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
+					</button>
 				</div>
-				<span class="card-discount">-30%</span>
-			</a>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-			<div class="card">
-				<img src="img/goods/mice/456_aju4-4e_iy6d-x7-fotor-bg-remover-2025022322220.png" height="220px">
-				<span class="card-good-name">Мышь игровая Logi</span>
-				<div class="card-price-buttons">
-					<div class="card-price">
-						<span class="card-actual-price">30 000 р.</span>
-						<span class="card-old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/shopping-cart_black.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-				</div>
-				<span class="card-discount">-30%</span>
-			</div>
-		</div>
+            </div>
+
+            <?php if ($product['discount_percent'] > 0): ?>
+                <span class="card-discount">-<?= $product['discount_percent'] ?>%</span>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+</div>
 	</main>
 
 
@@ -235,5 +222,7 @@
 			</div>
 		</div>
 	</footer>
+	<script src="js/showCategories.js"></script>
+	<script src="js/deleteFavsFromFavs.js"></script>
 </body>
 </html>

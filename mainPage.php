@@ -45,7 +45,7 @@
 <body>
 	<header class="header-container">
 		<div class="logo">
-			<a href="mainPage.html">
+			<a href="#">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
@@ -130,7 +130,7 @@
 				</button>
 			</div>
 			<div class="daily-good">
-				<span class="daily-good-span">Товары дня</span>
+				<span class="daily-good-span">Товар дня</span>
 				<a href="goodPage.html">
 					<img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220" class="daily-good-photo">
 				</a>
@@ -146,13 +146,6 @@
 						<img src="img/icons/shopping-cart_black.png" height="50px">
 					</button>
 				</div>	
-					
-				<button class="daily-good-btn daily-good-btn-left">
-					<
-				</button>
-				<button class="daily-good-btn daily-good-btn-right">
-					>
-				</button>
 			</div>
 		</div>
 		<h1>Новинки</h1>
