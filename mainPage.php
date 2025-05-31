@@ -30,6 +30,23 @@
 		$stmt->execute([$userId]);
 		$favItems = $stmt->fetchAll(PDO::FETCH_COLUMN);
 	}
+
+
+	$stmt = $pdo->query("SELECT * FROM products WHERE discount_percent > 0");
+	$discountedProducts = $stmt->fetchAll();
+
+	// Если товаров нет, ничего не делаем
+	if (count($discountedProducts) === 0) {
+		$dailyProduct = null;
+	} else {
+		// Генерируем "фиксированное" случайное число на каждый день
+		$today = date('Y-m-d'); // пример: 2025-05-31
+		$seed = strtotime($today); // уникальное число для сегодняшнего дня
+		srand($seed); // устанавливаем seed для генератора
+
+		$index = rand(0, count($discountedProducts) - 1);
+		$dailyProduct = $discountedProducts[$index];
+	}
 ?>
 
 <!DOCTYPE html>
@@ -50,11 +67,12 @@
 				<span class="logo-text">CYBERZONE</span>
 			</a>
 		</div>
-		<form action="search.html" class="search-container">
-			<input type="text" class="search-input" placeholder="Поиск...">
+		<form action="search.php" class="search-container" method="GET">
+			<input type="text" name="q" id="searchInput" class="search-input" placeholder="Поиск...">
 			<button class="search-button" type="submit">
 				<img src="img/icons/search.png" height="20" alt="Поиск">
 			</button>
+			<div id="searchResults" class="search-results"></div>
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
@@ -79,13 +97,13 @@
 					</a>
 					</div>
 					<div class="cart-logo">
-					<a href="cart.html" class="cart-link">
+					<a href="cart.php" class="cart-link">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
 						<span class="cart-counter"><?= count($cartItems) ?></span>
 					</a>
 					</div>
 					<div class="account-logo">
-					<a href="profile.html" class="account-link">
+					<a href="profile.php?id=<?= $userId ?>" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
 						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
@@ -121,7 +139,7 @@
 	<main>
 		<div class="banner-and-daily-goods">
 			<div class="banner">
-				<a href="mainPage.html" class=""><img src="img/banners/banner_3.png" class="banner-img" height="350px" alt="Баннер"></a>
+				<a href="catalog.php" id="bannerLink"><img src="img/banners/banner_3.png" class="banner-img" height="350px" alt="Баннер"></a>
 				<button class="banner-btn banner-btn-left">
 					<
 				</button>
@@ -129,24 +147,30 @@
 					>
 				</button>
 			</div>
-			<div class="daily-good">
-				<span class="daily-good-span">Товар дня</span>
-				<a href="goodPage.html">
-					<img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220" class="daily-good-photo">
-				</a>
-				<div class="daily-good-description-cart">
-					<a href = "goodPage.html" class="daily-good-description">
-						<span class="daily-good-name">Кресло игровое Cougar</span>
-						<div class="price">
-							<span class="actual-price">30 000 р.</span>
-							<span class="old-price">60 000 р.</span>
-						</div>
+			<?php if ($dailyProduct): ?>
+				<div class="daily-good">
+					<span class="daily-good-span">Товар дня</span>
+					<a href="goodPage.php?id=<?= $dailyProduct['id'] ?>">
+						<img src="<?= $dailyProduct['image_path'] ?>" height="220" class="daily-good-photo">
 					</a>
-					<button class="daily-good-add-to-cart">
-						<img src="img/icons/shopping-cart_black.png" height="50px">
-					</button>
-				</div>	
-			</div>
+					<div class="daily-good-description-cart">
+						<a href="goodPage.php?id=<?= $dailyProduct['id'] ?>" class="daily-good-description">
+							<span class="daily-good-name"><?= htmlspecialchars($dailyProduct['name']) ?></span>
+							<div class="price">
+								<span class="actual-price"><?= number_format($dailyProduct['price'] * (1 - $dailyProduct['discount_percent'] / 100), 0, '', ' ') ?> р.</span>
+								<span class="old-price"><?= number_format($dailyProduct['price'], 0, '', ' ') ?> р.</span>
+							</div>
+						</a>
+						<?php
+							$isInCart = in_array($dailyProduct['id'], $cartItems);
+						?>
+						<button class="add-to-cart" data-id="<?= $dailyProduct['id'] ?>">
+							<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
+						</button>
+					</div>
+				</div>
+
+			<?php endif; ?>
 		</div>
 		<h1>Новинки</h1>
 		<div class="catalog">
@@ -263,6 +287,7 @@
 			</div>
 		</div>
 	</footer>
+	<script src="js/search.js"></script>
 	<script src="js/mainPageSlider.js"></script>
 	<script src="js/showCategories.js"></script>
 	<script src="js/actions.js"></script>

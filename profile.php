@@ -1,9 +1,35 @@
+<?php
+	include 'server/db/db.php';
+	session_start();
+	$userId = $_SESSION['user_id'] ?? null;
+	// Проверка наличия ID
+	if (!$userId) {
+		echo "Пользователь не найден.";
+		exit;
+	}
+
+	$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+	$stmt->execute([$userId]);
+	$user = $stmt->fetch();
+
+	$stmt = $pdo->prepare("
+		SELECT o.*, p.name, p.image_path, r.rating
+		FROM orders o
+		JOIN products p ON o.product_id = p.id
+		LEFT JOIN reviews r ON r.product_id = p.id AND r.user_id = o.user_id
+		WHERE o.user_id = ?
+	");
+	$stmt->execute([$userId]);
+	$orders = $stmt->fetchAll()
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="styles/cart.css">
+	<link rel="stylesheet" href="styles/profile.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
@@ -61,77 +87,64 @@
 
 
 	<main>
-		<div class="cart-page">
-			<div class="cart-list">
-				<div class="cart-list-manipulations">
-					<div class="checkbox">
-						<input type="checkbox"/>
-						<span class="check-all">Выбрать всё</span>
+		<div class="profile-page">
+			<div class="profile-info">
+				<span class="welcome-span">Добро пожаловать, <?= htmlspecialchars($user['first_name']) ?></span>
+				<div class="info-tablet">
+					<div class="name-info">
+						<span class="name">Имя:</span>
+						<span class="value" data-field="first_name"><?= htmlspecialchars($user['first_name']) ?></span>
 					</div>
-					<button class="remove-checked">Удалить выбранные</button>
-				</div>
-				<div class="cart-card">
-					<a href="goodPage.html"><img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220px"></a>
-					<span class="good-name">Кресло Cougar</span>
-					<div class="cart-good-price">
-						<span class="actual-price">30 000 р.</span>
-						<span class="old-price">60 000 р.</span>
+					<div class="surname-info">
+						<span class="surname">Фамилия:</span>
+						<span class="value" data-field="last_name"><?= htmlspecialchars($user['last_name']) ?></span>
 					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/recycle-bin.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
+					<div class="email-info">
+						<span class="email">Email:</span>
+						<span class="value" data-field="email"><?= htmlspecialchars($user['email']) ?></span>
 					</div>
-					<input class="check-good" type="checkbox"/>
-				</div>
-				<div class="cart-card">
-					<img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220px">
-					<span class="good-name">Кресло Cougar</span>
-					<div class="cart-good-price">
-						<span class="actual-price">30 000 р.</span>
-						<span class="old-price">60 000 р.</span>
+					<div class="phone-info">
+						<span class="phone">Номер телефона:</span>
+						<span class="value" data-field="phone"><?= htmlspecialchars($user['phone']) ?></span>
 					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/recycle-bin.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
+					<div class="buttons">
+						<button class="change-info-btn">Изменить</button>
+						<button class="delete-account-btn">Выйти</button>
 					</div>
-
-					<input class="check-good" type="checkbox"/>
-				</div>
-				<div class="cart-card">
-					<a href="goodPage.html"><img src="img/goods/armchairs/36287_middle-fotor-bg-remover-20250222131346.png" height="220px"></a>
-					<span class="good-name">Кресло Cougar</span>
-					<div class="cart-good-price">
-						<span class="actual-price">30 000 р.</span>
-						<span class="old-price">60 000 р.</span>
-					</div>
-					<div class="card-buttons">
-						<button><img src="img/icons/recycle-bin.png" height="30px"></button>
-						<button><img src="img/icons/heart_black.png" height="30px"></button>
-					</div>
-
-					<input class="check-good" type="checkbox"/>
 				</div>
 			</div>
-
-			<div class="make-order">
-				<div class="bill">
-					<div class="goods-price">
-						<span class="goods-price counter">5 Товаров</span>
-						<span class="dots"></span>
-						<span class="goods-price price">12 344 р.</span>
-					</div>
-					<div class="discound">
-						<span class="discound counter">Скидка</span>
-						<span class="dots"></span>
-						<span class="discound price">5 555 р.</span>
-					</div>
-					<div class="final-price">
-						<span class="final-price span">Итого</span>
-						<span class="dots"></span>
-						<span class="final-price price">7 703 р.</span>
-					</div>
+			<div class="orders-history">
+				<span class="orders-history-span">История заказов</span>
+				<div class="orders-history-list">
+					<?php if (empty($orders)): ?>
+						<h3 class="empty-orders">Пользователь еще не делал заказов.</h3>
+					<?php else: ?>
+						<?php foreach ($orders as $order): ?>
+							<div class="order-cart" data-product-id="<?= $order['product_id'] ?>">
+								<a href="goodPage.php?id=<?= $order['product_id'] ?>">
+									<img src="<?= $order['image_path'] ?>" height="220px">
+								</a>
+								<div class="order-info">
+									<span class="order-date"><?= date('d.m.Y', strtotime($order['ordered_at'])) ?></span>
+									<span class="order-name"><?= htmlspecialchars($order['name']) ?></span>
+									<div class="rate">
+										<span class="rate-span">Оцените товар</span>
+										<div class="stars">
+											<?php
+											$rating = $order['rating'] ?? 0; // оценка или 0, если нет
+											for ($i = 1; $i <= 5; $i++): ?>
+												<button class="star-btn" data-rating="<?= $i ?>">
+													<img src="img/icons/<?= ($i <= $rating) ? 'star_yellow' : 'star_gray' ?>.png" height="40px">
+												</button>
+											<?php endfor; ?>
+										</div>
+									</div>
+									<span class="price"><?= number_format($order['price_at_order'], 0, '', ' ') ?> р.</span>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					<?php endif; ?>
 				</div>
-				<button class="make-order-btn">Оформить заказ</button>
 			</div>
 		</div>
 	</main>
@@ -201,4 +214,7 @@
 		</div>
 	</footer>
 </body>
+<script src="js/updateProfileInfo.js"></script>
+<script src="js/addReview.js"></script>
+<script src="js/logout.js"></script>
 </html>

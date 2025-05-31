@@ -261,6 +261,10 @@ main{
 	margin-top: 40px;
 }
 
+.empty-orders{
+	color: #000;
+}
+
 .order-cart{
 	display: flex;
 	background-color: white;
@@ -272,6 +276,10 @@ main{
 	max-width: 970px;
 	margin-bottom: 30px;
 	box-sizing: border-box;
+}
+
+.order-cart img{
+	border-radius: 10px;
 }
 
 .order-info{

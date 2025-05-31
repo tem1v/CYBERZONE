@@ -1,9 +1,64 @@
+<?php
+	session_start();
+	include 'server/db/db.php';
+
+	$userId = $_SESSION['user_id'] ?? null;
+
+	if (!$userId) {
+		header('Location: login.php');
+		exit;
+	}
+
+	$stmt = $pdo->prepare("
+		SELECT p.*
+		FROM cart_items c
+		JOIN products p ON c.product_id = p.id
+		WHERE c.user_id = ?
+	");
+	$stmt->execute([$userId]);
+	$cartProducts = $stmt->fetchAll();
+
+	$stmt = $pdo->prepare("
+		SELECT p.*
+		FROM favorites c
+		JOIN products p ON c.product_id = p.id
+		WHERE c.user_id = ?
+	");
+	$stmt->execute([$userId]);
+	$favoriteProducts = $stmt->fetchAll();
+
+	function pluralForm($number, $forms) {
+		$number = abs($number) % 100;
+		$n1 = $number % 10;
+		if ($number > 10 && $number < 20) return $forms[2];
+		if ($n1 > 1 && $n1 < 5) return $forms[1];
+		if ($n1 == 1) return $forms[0];
+		return $forms[2];
+	}
+	$totalPrice = 0;        // сумма всех оригинальных цен
+	$totalDiscount = 0;     // сумма всех скидок
+
+	foreach ($cartProducts as $product) {
+		$original = $product['price'];
+		$discountPercent = $product['discount_percent'];
+
+		$discountAmount = ($original * $discountPercent) / 100;
+		$discounted = $original - $discountAmount;
+
+		$totalPrice += $original;
+		$totalDiscount += $discountAmount;
+	}
+
+	$finalPrice = $totalPrice - $totalDiscount;
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="styles/profile.css">
+	<link rel="stylesheet" href="styles/cart.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
@@ -61,106 +116,78 @@
 
 
 	<main>
-		<div class="profile-page">
-			<div class="profile-info">
-				<span class="welcome-span">Добро пожаловать, Артём</span>
-				<div class="info-tablet">
-					<div class="name-info">
-						<span class="name">Имя:</span>
-						<span class="value">Артём</span>
-					</div>
-					<div class="surname-info">
-						<span class="surname">Фамилия:</span>
-						<span class="value">Ляхов</span>
-					</div>
-					<div class="email-info">
-						<span class="email">Email:</span>
-						<span class="value">alyhov49@gmail.com</span>
-					</div>
-					<div class="phone-info">
-						<span class="phone">Номер телефона:</span>
-						<span class="value">+79869034683</span>
-					</div>
-					<div class="sex-info">
-						<span class="sex">Пол:</span>
-						<span class="value">Мужчина</span>
-					</div>
-					<div class="bdate-info">
-						<span class="bdate">Дата рождения:</span>
-						<span class="value">02.06.2005</span>
-					</div>
-					<div class="buttons">
-						<button class="change-info-btn">Изменить</button>
-						<button class="delete-account-btn">Выйти</button>
-					</div>
+		<div class="cart-page">
+			<?php if (empty($cartProducts)): ?>
+				<div class="empty-cart-message">
+					<h1>Ваша корзина пуста.</h1>
 				</div>
-			</div>
-			<div class="orders-history">
-				<span class="orders-history-span">История заказов</span>
-				<div class="orders-history-list">
-					<div class="order-cart">
-						<img src="img/goods/headphones/hyperx-cloud-stinger-2-1-600x600-fotor-bg-remover-20250313172950.png" height="220px">
-						<div class="order-info">
-							<span class="order-date">02.02.2025</span>
-							<span class="order-name">Наушники ХайперИкс</span>
-							<div class="rate">
-								<span class="rate-span">Оцените товар</span>
-								<div class="stars">
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-								</div>
+			<?php else: ?>
+				<div class="cart-list">
+					<?php foreach ($cartProducts as $product): ?>
+						<div class="cart-card">
+							<a href="goodPage.php?id=<?= $product['id'] ?>">
+								<img src="<?= htmlspecialchars($product['image_path']) ?>" height="220px">
+							</a>
+							<span class="good-name"><?= htmlspecialchars($product['name']) ?></span>
+							<div class="cart-good-price">
+								<span class="card-actual-price">
+									<?= number_format(
+										!empty($product['discount_percent']) 
+											? $product['price'] * (1 - $product['discount_percent'] / 100) 
+											: $product['price'], 
+										0, '', ' '
+									) ?> р.
+								</span>
+
+								<span class="card-old-price" style="<?= empty($product['discount_percent']) ? 'text-decoration: none; color: transparent;' : '' ?>">
+									<?php if (!empty($product['discount_percent'])): ?>
+										<?= number_format($product['price'], 0, '', ' ') ?> р.
+									<?php else: ?>
+										&nbsp;
+									<?php endif; ?>
+								</span>
 							</div>
-							<span class="price">30 000 р.</span>
-						</div>
-						
-					</div>
-				</div>
-				<div class="orders-history-list">
-					<div class="order-cart">
-						<img src="img/goods/headphones/hyperx-cloud-stinger-2-1-600x600-fotor-bg-remover-20250313172950.png" height="220px">
-						<div class="order-info">
-							<span class="order-date">02.02.2025</span>
-							<span class="order-name">Наушники ХайперИкс</span>
-							<div class="rate">
-								<span class="rate-span">Оцените товар</span>
-								<div class="stars">
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-								</div>
+							<?php
+								$cartItems = array_column($cartProducts, 'id');
+								$favItems = array_column($favoriteProducts, 'id');
+
+								$isInCart = in_array($product['id'], $cartItems);
+								$isInFav = in_array($product['id'], $favItems);
+							?>
+							<div class="card-buttons">
+								<button class="remove-from-cart" data-id="<?= $product['id'] ?>">
+									<img src="img/icons/recycle-bin.png" height="30px">
+								</button>
+								<button class="add-to-favorites" data-id="<?= $product['id'] ?>">
+									<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
+								</button>
 							</div>
-							<span class="price">30 000 р.</span>
 						</div>
-						
-					</div>
+					<?php endforeach; ?>
 				</div>
-				<div class="orders-history-list">
-					<div class="order-cart">
-						<img src="img/goods/headphones/hyperx-cloud-stinger-2-1-600x600-fotor-bg-remover-20250313172950.png" height="220px">
-						<div class="order-info">
-							<span class="order-date">02.02.2025</span>
-							<span class="order-name">Наушники ХайперИкс</span>
-							<div class="rate">
-								<span class="rate-span">Оцените товар</span>
-								<div class="stars">
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-									<button ><img src="img/icons/star_gray.png" height="40px"></button>
-								</div>
-							</div>
-							<span class="price">30 000 р.</span>
+
+				<div class="make-order">
+					<div class="bill">
+						<div class="goods-price">
+							<span class="goods-price counter"><?= count($cartProducts) ?> <?= pluralForm(count($cartProducts), ['товар', 'товара', 'товаров']) ?></span>
+							<span class="dots"></span>
+							<span class="goods-price price"><?= number_format($totalPrice, 0, '', ' ') ?> р.</span>
 						</div>
-						
+						<div class="discound">
+							<span class="discound counter">Скидка</span>
+							<span class="dots"></span>
+							<span class="discound price"><?= number_format($totalDiscount, 0, '', ' ') ?> р.</span>
+						</div>
+						<div class="final-price">
+							<span class="final-price span">Итого</span>
+							<span class="dots"></span>
+							<span class="final-price price"><?= number_format($finalPrice, 0, '', ' ') ?> р.</span>
+						</div>
 					</div>
+					<button class="make-order-btn">Оформить заказ</button>
 				</div>
-			</div>
+			<?php endif; ?>
+
 		</div>
 	</main>
 
@@ -228,5 +255,7 @@
 			</div>
 		</div>
 	</footer>
+	<script src="js/deleteFromCart.js"></script>
+	<script src="js/makeOrder.js"></script>
 </body>
 </html>

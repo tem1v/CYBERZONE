@@ -177,6 +177,11 @@ main{
 	max-width: 1920px;
 	border-radius: 20px;
 	flex: 1;
+	min-height: 800px;
+}
+
+.empty-cart-message h1{
+	color:#000
 }
 
 .cart-page{
@@ -277,6 +282,7 @@ main{
 
 .make-order-btn{
 	background-color: #54C758;
+	color: white;
 	border: none;
 	width: 100%;
 	border-radius: 10px;
@@ -295,6 +301,10 @@ main{
                 0px 4px 6px -2px rgba(0, 0, 0, 0.05);
 	width: 100%;
 	margin-bottom: 20px;
+}
+
+.cart-card img{
+	border-radius: 10px;
 }
 
 .good-name{

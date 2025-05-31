@@ -179,9 +179,22 @@ main{
 	border-radius: 20px;
 	padding: 50px 170px;
 	display: flex;
-	justify-content: space-between;
+	justify-content: start;
 	gap: 80px;
 	box-sizing: border-box;
+}
+#filterForm{
+	height: 100%;
+}
+
+#filterForm button{
+	background-color: #54C758;
+	color: white;
+	border-radius: 5px;
+	border: none;
+	height: 40px;
+	margin: 15px;
+	cursor: pointer;
 }
 
 .filter{
@@ -193,7 +206,11 @@ main{
 	height: 100%;
 	width: 300px;
 	margin-top: 90px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
+
 
 .price{
 	border-bottom: 1px solid #525252;
@@ -267,6 +284,11 @@ main{
 	color: #000;
 }
 
+.filter-discount label{
+	color: #000;
+	font-size: 20px;
+}
+
 .sort{
 	display: flex;
 	gap: 5px;
@@ -311,15 +333,28 @@ main{
 	transition: transform 0.1s ease;
 }
 
+.card img{
+	border-radius: 10px;
+	width: 100%;
+}
+
+.card a{
+	text-decoration: none;
+}
+
 .card:hover{
 	transform: scale(1.03);
 }
 
 .card-good-name{
+	display: block;
 	font-weight: lighter;
 	color: #181818;
 	font-size: 18px;
 	padding: 5px 5px 0px 5px;
+	white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
 }
 .card-price-buttons{
 	display: flex;

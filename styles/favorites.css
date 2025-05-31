@@ -188,10 +188,14 @@ main{
 	border-radius: 20px;
 }
 
-.favorites-span{
+.favorites-span, .empty-favorites-message{
 	color: #000;
 	padding: 30px 250px;
 	margin: 0;
+}
+
+.empty-favorites-message h1{
+	color: #000;
 }
 
 .catalog{

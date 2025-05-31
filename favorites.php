@@ -95,47 +95,53 @@
 
 
 	<main>
-		<h1 class="favorites-span">Избранные товары</h1>
-		<div class="catalog">
-    <?php foreach ($favorites as $product): ?>
-        <?php
-            $discountedPrice = $product['price'] * (1 - $product['discount_percent'] / 100);
-        ?>
-        <div class="card" data-id="<?= $product['id'] ?>">
-            <a href="goodPage.php?id=<?= $product['id'] ?>">
-                <img src="<?= $product['image_path'] ?>" height="220px">
-                <span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
-            </a>
+		<?php if (empty($cartProducts)): ?>
+			<div class="empty-favorites-message">
+				<h1>У вас нет избранных товарв</h1>
+			</div>
+		<?php else: ?>
+			<h1 class="favorites-span">Избранные товары</h1>
+			<div class="catalog">
+				<?php foreach ($favorites as $product): ?>
+					<?php
+						$discountedPrice = $product['price'] * (1 - $product['discount_percent'] / 100);
+					?>
+					<div class="card" data-id="<?= $product['id'] ?>">
+						<a href="goodPage.php?id=<?= $product['id'] ?>">
+							<img src="<?= $product['image_path'] ?>" height="220px">
+							<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
+						</a>
 
-            <div class="card-price-buttons">
-                <div class="card-price">
-                    <span class="card-actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
-                    <?php if ($product['discount_percent'] > 0): ?>
-                        <span class="card-old-price"><?= number_format($product['price'], 0, '', ' ') ?> р.</span>
-                    <?php else: ?>
-                        &nbsp;
-                    <?php endif; ?>
-                </div>
-                <?php
-					$isInCart = in_array($product['id'], $cartItems);
-					$isInFav = in_array($product['id'], $favItems);
-				?>
-				<div class="card-buttons">
-					<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
-						<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
-					</button>
-					<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
-						<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
-					</button>
-				</div>
-            </div>
+						<div class="card-price-buttons">
+							<div class="card-price">
+								<span class="card-actual-price"><?= number_format($discountedPrice, 0, '', ' ') ?> р.</span>
+								<?php if ($product['discount_percent'] > 0): ?>
+									<span class="card-old-price"><?= number_format($product['price'], 0, '', ' ') ?> р.</span>
+								<?php else: ?>
+									&nbsp;
+								<?php endif; ?>
+							</div>
+							<?php
+								$isInCart = in_array($product['id'], $cartItems);
+								$isInFav = in_array($product['id'], $favItems);
+							?>
+							<div class="card-buttons">
+								<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+									<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
+								</button>
+								<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+									<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
+								</button>
+							</div>
+						</div>
 
-            <?php if ($product['discount_percent'] > 0): ?>
-                <span class="card-discount">-<?= $product['discount_percent'] ?>%</span>
-            <?php endif; ?>
-        </div>
-    <?php endforeach; ?>
-</div>
+						<?php if ($product['discount_percent'] > 0): ?>
+							<span class="card-discount">-<?= $product['discount_percent'] ?>%</span>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
 	</main>
 
 

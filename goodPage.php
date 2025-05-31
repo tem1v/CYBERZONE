@@ -57,11 +57,16 @@
 	$installment = round($discountedPrice / 12);
 
 	$stmt = $pdo->prepare("
-		SELECT r.*, u.first_name 
-		FROM reviews r
-		JOIN users u ON r.user_id = u.id
-		WHERE r.product_id = ?
-		ORDER BY r.created_at DESC
+	SELECT r.*, u.first_name 
+	FROM reviews r
+	JOIN users u ON r.user_id = u.id
+	WHERE r.product_id = ?
+	ORDER BY 
+		CASE 
+			WHEN r.comment IS NULL OR TRIM(r.comment) = '' THEN 1
+			ELSE 0
+		END,
+		r.created_at DESC
 	");
 	$stmt->execute([$id]);
 	$reviews = $stmt->fetchAll();
@@ -89,6 +94,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/goodPage.css">
+	<link rel="stylesheet" href="login-component/loginStyle.css">
 	<title><?= htmlspecialchars($product['name']) ?></title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
@@ -134,7 +140,7 @@
 					</a>
 					</div>
 					<div class="account-logo">
-					<a href="profile.html" class="account-link">
+					<a href="profile.php" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
 						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
