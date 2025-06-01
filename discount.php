@@ -1,5 +1,6 @@
 <?php
 	include 'server/db/db.php';
+	include 'login-component/login-modal.php';
     session_start();
 	$isLoggedIn = isset($_SESSION['user_id']);
 	$userId = $_SESSION['user_id'] ?? null;
@@ -32,6 +33,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/search-discount.css">
+	<link rel="stylesheet" href="login-component/loginStyle.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
@@ -136,10 +138,10 @@
 						$isInFav = in_array($product['id'], $favItems);
 						?>
 						<div class="card-buttons">
-							<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+							<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 								<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
 							</button>
-							<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+							<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 								<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
 							</button>
 						</div>
