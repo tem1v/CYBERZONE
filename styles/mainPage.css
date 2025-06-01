@@ -165,7 +165,7 @@ header{
 	text-decoration: none;
 }
 
-.cart-counter{
+.cart-counter, .cart-counter-default{
 	position: absolute;
 	top: 20px;
 	left: 10px;

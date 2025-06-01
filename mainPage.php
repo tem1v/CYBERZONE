@@ -119,7 +119,7 @@
 					<div class="cart-logo">
 					<a href="#" class="cart-link" onclick="openLoginModal(event)">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">1</span>
+						<span class="cart-counter-default">0</span>
 					</a>
 					</div>
 					<div class="account-logo">
@@ -206,10 +206,21 @@
 						$isInFav = in_array($product['id'], $favItems);
 					?>
 					<div class="card-buttons">
-						<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+						<button
+							type="button"
+							class="add-to-cart"
+							data-id="<?= $product['id'] ?>"
+							<?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>
+						>
 							<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
 						</button>
-						<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+
+						<button
+							type="button"
+							class="add-to-favorites"
+							data-id="<?= $product['id'] ?>"
+							<?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>
+						>
 							<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
 						</button>
 					</div>
