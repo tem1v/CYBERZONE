@@ -34,15 +34,14 @@ try {
     $pdo->beginTransaction();
 
     $insertStmt = $pdo->prepare("
-        INSERT INTO orders (user_id, product_id, quantity, price_at_order, ordered_at)
-        VALUES (?, ?, ?, ?, NOW())
+        INSERT INTO orders (user_id, product_id, price_at_order, ordered_at)
+        VALUES (?, ?, ?, NOW())
     ");
 
     foreach ($cartItems as $item) {
         $insertStmt->execute([
             $userId,
             $item['product_id'],
-            $item['quantity'] ?? 1,
             $item['discounted_price']
         ]);
     }

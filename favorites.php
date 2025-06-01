@@ -119,7 +119,7 @@
 
 
 	<main>
-		<?php if (empty($cartProducts)): ?>
+		<?php if (empty($favorites)): ?>
 			<div class="empty-favorites-message">
 				<h1>У вас нет избранных товарв</h1>
 			</div>

@@ -1,6 +1,12 @@
 <?php
 	include 'server/db/db.php';
 	session_start();
+
+
+	header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+	header("Cache-Control: post-check=0, pre-check=0", false);
+	header("Pragma: no-cache");
+
 	$userId = $_SESSION['user_id'] ?? null;
 	// Проверка наличия ID
 	if (!$userId) {
@@ -159,7 +165,7 @@
 				<span class="orders-history-span">История заказов</span>
 				<div class="orders-history-list">
 					<?php if (empty($orders)): ?>
-						<h3 class="empty-orders">Пользователь еще не делал заказов.</h3>
+						<h3 class="empty-orders">Вы еще не делали заказов.</h3>
 					<?php else: ?>
 						<?php foreach ($orders as $order): ?>
 							<div class="order-cart" data-product-id="<?= $order['product_id'] ?>">
