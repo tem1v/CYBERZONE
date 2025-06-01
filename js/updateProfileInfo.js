@@ -1,67 +1,80 @@
-document.querySelector(".change-info-btn").addEventListener("click", function () {
-    const isEdit = this.textContent === "Сохранить";
-    const fields = document.querySelectorAll(".value");
-    const cancelBtn = document.querySelector(".delete-account-btn");
+document
+    .querySelector(".change-info-btn")
+    .addEventListener("click", function () {
+        const isEdit = this.textContent === "Сохранить";
+        const fields = document.querySelectorAll(".value, .edit-input");
+        const cancelBtn = document.querySelector(".delete-account-btn");
 
-    if (!isEdit) {
-        // Переключаемся в режим редактирования
-        fields.forEach(span => {
-            const fieldName = span.dataset.field;
-            const currentValue = span.textContent.trim();
-            let inputType = "text";
+        if (!isEdit) {
+            fields.forEach((span) => {
+                if (!span.classList.contains("value")) return;
 
-            if (fieldName === "birth_date") inputType = "date";
-            if (fieldName === "email") inputType = "email";
-            if (fieldName === "phone") inputType = "tel";
+                const fieldName = span.dataset.field;
+                const currentValue = span.textContent.trim();
+                let inputType = "text";
 
-            const input = document.createElement("input");
-            input.type = inputType;
-            input.name = fieldName;
-            input.value = fieldName === "birth_date" ? formatDateForInput(currentValue) : currentValue;
-            input.classList.add("edit-input");
+                if (fieldName === "email") inputType = "email";
+                if (fieldName === "phone") inputType = "tel";
 
-            span.replaceWith(input);
-        });
+                const input = document.createElement("input");
+                input.type = inputType;
+                input.name = fieldName;
+                input.value = currentValue;
+                input.classList.add("edit-input");
 
-        this.textContent = "Сохранить";
-        cancelBtn.textContent = "Отменить";
-    } else {
-        // Здесь можно отправить данные на сервер или просто обновить отображение
-        const inputs = document.querySelectorAll(".edit-input");
-        inputs.forEach(input => {
-            const span = document.createElement("span");
-            span.classList.add("value");
-            span.dataset.field = input.name;
+                span.replaceWith(input);
+            });
 
-            if (input.name === "birth_date") {
-                const formattedDate = new Date(input.value).toLocaleDateString('ru-RU');
-                span.textContent = formattedDate;
-            } else {
-                span.textContent = input.value;
-            }
+            this.textContent = "Сохранить";
+            cancelBtn.textContent = "Отменить";
+        } else {
+			const inputs = document.querySelectorAll(".edit-input");
+            const formData = new FormData();
 
-            input.replaceWith(span);
-        });
+            inputs.forEach((input) => {
+                formData.append(input.name, input.value);
+            });
 
-        this.textContent = "Изменить";
-        cancelBtn.textContent = "Выйти";
-    }
-});
+            fetch("../server/updateProfile.php", {
+                method: "POST",
+                body: formData,
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.success) {
+                        inputs.forEach((input) => {
+                            const span = document.createElement("span");
+                            span.classList.add("value");
+                            span.dataset.field = input.name;
+                            span.textContent = input.value;
+                            input.replaceWith(span);
+							location.reload();
+                        });
 
-document.querySelector(".delete-account-btn").addEventListener("click", function () {
-    if (this.textContent === "Отменить") {
-        // Отмена редактирования — восстановим оригинальные значения
-        location.reload(); // Самый простой способ — перезагрузить страницу
-    } else {
-        if (confirm("Вы уверены, что хотите выйти?")) {
-            window.location.href = "../server/logout.php"; // ваш обработчик выхода
+                        this.textContent = "Изменить";
+                        cancelBtn.textContent = "Выйти";
+                    } else {
+                        alert(
+                            "Ошибка: " +
+                                (data.message || "Не удалось обновить данные")
+                        );
+                    }
+                })
+                .catch(() => {
+                    alert("Произошла ошибка при обновлении профиля");
+                });
+
         }
-    }
-});
+    });
 
-function formatDateForInput(dateStr) {
-    const parts = dateStr.split(".");
-    if (parts.length !== 3) return "";
-    const [day, month, year] = parts;
-    return `${year}-${month}-${day}`;
-}
+document
+    .querySelector(".delete-account-btn")
+    .addEventListener("click", function () {
+        if (this.textContent === "Отменить") {
+            location.reload();
+        } else {
+            if (confirm("Вы уверены, что хотите выйти?")) {
+                window.location.href = "../server/logout.php";
+            }
+        }
+});

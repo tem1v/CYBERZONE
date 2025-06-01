@@ -267,6 +267,10 @@ main{
 	color:#848484;
 }
 
+.info-tablet input{
+	color: #000;
+}
+
 .buttons{
 	display: flex;
 	gap:40px;
