@@ -41,8 +41,7 @@
 						value="<?= htmlspecialchars($_SESSION['registration_data']['email'] ?? '') ?>">
 					<input type="tel" name="phone" placeholder="Телефон" required
 						value="<?= htmlspecialchars($_SESSION['registration_data']['phone'] ?? '') ?>">
-					<input type="password" name="password" placeholder="Пароль" required 
-						value="<?= htmlspecialchars($_SESSION['registration_data']['first_name'] ?? '') ?>">
+					<input type="password" name="password" placeholder="Пароль" required>
 					<input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
 					<span id="registration-error" style="color: red;">
 						<?php 

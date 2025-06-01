@@ -17,6 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Пожалуйста, заполните все поля.";
     }
 
+	if (strlen($password) < 8) {
+		$errors[] = "Пароль должен быть не короче 8 символов.";
+	}
+	
+	if (!preg_match('/^\+7\d{10}$/', $phone)) {
+		$errors[] = "Номер телефона должен начинаться с +7 и содержать всего 11 символов.";
+	}
+
     // Проверка, есть ли пользователь с таким email или телефоном
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ? OR phone = ?");
     $stmt->execute([$email, $phone]);
