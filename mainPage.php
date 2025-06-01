@@ -39,10 +39,9 @@
 	if (count($discountedProducts) === 0) {
 		$dailyProduct = null;
 	} else {
-		// Генерируем "фиксированное" случайное число на каждый день
-		$today = date('Y-m-d'); // пример: 2025-05-31
-		$seed = strtotime($today); // уникальное число для сегодняшнего дня
-		srand($seed); // устанавливаем seed для генератора
+		$today = date('Y-m-d');
+		$seed = strtotime($today);
+		srand($seed);
 
 		$index = rand(0, count($discountedProducts) - 1);
 		$dailyProduct = $discountedProducts[$index];
@@ -164,7 +163,7 @@
 						<?php
 							$isInCart = in_array($dailyProduct['id'], $cartItems);
 						?>
-						<button class="add-to-cart" data-id="<?= $dailyProduct['id'] ?>">
+						<button class="add-to-cart" data-id="<?= $dailyProduct['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 							<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
 						</button>
 					</div>

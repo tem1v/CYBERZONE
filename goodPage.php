@@ -99,18 +99,19 @@
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
-	<header class="header-container">
+<header class="header-container">
 		<div class="logo">
 			<a href="mainPage.php">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
 		</div>
-		<form action="search.html" class="search-container">
-			<input type="text" class="search-input" placeholder="Поиск...">
+		<form action="search.php" class="search-container" method="GET">
+			<input type="text" name="q" id="searchInput" class="search-input" placeholder="Поиск...">
 			<button class="search-button" type="submit">
 				<img src="img/icons/search.png" height="20" alt="Поиск">
 			</button>
+			<div id="searchResults" class="search-results"></div>
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
@@ -125,6 +126,7 @@
 						<?php endforeach; ?>
 					</div>
 				</div>
+
 			</div>
 			<?php if (isset($_SESSION['user_id'])): ?>
 				<div class="action-icons">
@@ -134,13 +136,13 @@
 					</a>
 					</div>
 					<div class="cart-logo">
-					<a href="cart.html" class="cart-link">
+					<a href="cart.php" class="cart-link">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
 						<span class="cart-counter"><?= count($cartItems) ?></span>
 					</a>
 					</div>
 					<div class="account-logo">
-					<a href="profile.php" class="account-link">
+					<a href="profile.php?id=<?= $userId ?>" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
 						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
@@ -156,7 +158,7 @@
 					<div class="cart-logo">
 					<a href="#" class="cart-link" onclick="openLoginModal(event)">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">0</span>
+						<span class="cart-counter-default">0</span>
 					</a>
 					</div>
 					<div class="account-logo">
@@ -225,7 +227,7 @@
 					<?php
 						$isInCart = in_array($product['id'], $cartItems);
 					?>
-					<button class="add-to-cart-btn" data-id="<?= $product['id'] ?>"><?= $isInCart ? 'Убрать из корзины' : 'Добавить в корзину' ?></button>
+					<button class="add-to-cart-btn" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>><?= $isInCart ? 'Убрать из корзины' : 'Добавить в корзину' ?></button>
 				</div>
 			</div>
 		</div>
@@ -324,5 +326,6 @@
 	<script src="js/showCategories.js"></script>
 	<script src="js/reloadWindow.js"></script>
 	<script src="js/actions.js"></script>
+	<script src="js/search.js"></script>
 </body>
 </html>

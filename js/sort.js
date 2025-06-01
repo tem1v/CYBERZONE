@@ -1,8 +1,25 @@
+// document.getElementById("sortSelect").addEventListener("change", function () {
+//     const selected = this.value;
+//     const urlParams = new URLSearchParams(window.location.search);
+
+//     urlParams.set("sort", selected);
+
+//     window.location.search = urlParams.toString();
+// });
+
 document.getElementById("sortSelect").addEventListener("change", function () {
-    const selected = this.value;
-    const urlParams = new URLSearchParams(window.location.search);
+    const sortValue = this.value;
+    const form = document.getElementById("filterForm");
 
-    urlParams.set("sort", selected); // Устанавливаем параметр sort
+    // Добавляем/обновляем hidden input с именем sort
+    let sortInput = form.querySelector("input[name='sort']");
+    if (!sortInput) {
+        sortInput = document.createElement("input");
+        sortInput.type = "hidden";
+        sortInput.name = "sort";
+        form.appendChild(sortInput);
+    }
+    sortInput.value = sortValue;
 
-    window.location.search = urlParams.toString(); // Обновляем URL
+    form.submit(); // Отправляем форму с новым значением sort
 });

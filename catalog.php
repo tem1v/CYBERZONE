@@ -1,5 +1,6 @@
 <?php
 include 'server/db/db.php';
+include 'login-component/login-modal.php';
 session_start();
 $isLoggedIn = isset($_SESSION['user_id']);
 $userId = $_SESSION['user_id'] ?? null;
@@ -15,7 +16,11 @@ if ($categoryId) {
     $productStmt = $pdo->query("SELECT * FROM products");
 }
 $products = $productStmt->fetchAll(); // ✅ Сохраняем здесь, до перезаписи
-
+$categories = [];
+	$query = $pdo->query("SELECT id, name FROM categories");
+	if ($query) {
+		$categories = $query->fetchAll(PDO::FETCH_ASSOC);
+	}
 $cartItems = [];
 $favItems = [];
 
@@ -111,44 +116,58 @@ $color = $_GET['color'] ?? null;
 $discountOnly = isset($_GET['discount_only']);
 
 $sql = "SELECT * FROM products WHERE 1=1";
+
 $params = [];
+$sql = "
+    SELECT 
+        p.*, 
+        AVG(r.rating) AS avg_rating 
+    FROM products p
+    LEFT JOIN reviews r ON p.id = r.product_id
+    WHERE 1=1
+";
 
 // Категория
 if ($categoryId) {
-    $sql .= " AND category_id = ?";
+    $sql .= " AND p.category_id = ?";
     $params[] = $categoryId;
 }
 
 // Цена
 if (!empty($minPrice)) {
-    $sql .= " AND price >= ?";
+    $sql .= " AND p.price >= ?";
     $params[] = $minPrice;
 }
 if (!empty($maxPrice)) {
-    $sql .= " AND price <= ?";
+    $sql .= " AND p.price <= ?";
     $params[] = $maxPrice;
 }
 
 // Бренд
 if ($brand && $brand !== 'all') {
-    $sql .= " AND brand = ?";
+    $sql .= " AND p.brand = ?";
     $params[] = $brand;
 }
 
 // Цвет
 if ($color && $color !== 'all') {
-    $sql .= " AND color = ?";
+    $sql .= " AND p.color = ?";
     $params[] = $color;
 }
 
 // Скидка
 if ($discountOnly) {
-    $sql .= " AND discount_percent > 0";
+    $sql .= " AND p.discount_percent > 0";
 }
+
+// Группировка и сортировка
+$sql .= " GROUP BY p.id ORDER BY $orderBy";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $products = $stmt->fetchAll();
+
+
 
 ?>
 <!DOCTYPE html>
@@ -157,56 +176,81 @@ $products = $stmt->fetchAll();
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/catalog.css">
+	<link rel="stylesheet" href="login-component/loginStyle.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
 	<header class="header-container">
 		<div class="logo">
-			<a href="mainPage.html">
+			<a href="mainPage.php">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
 		</div>
-		<form action="search.html" class="search-container">
-			<input type="text" class="search-input" placeholder="Поиск...">
+		<form action="search.php" class="search-container" method="GET">
+			<input type="text" name="q" id="searchInput" class="search-input" placeholder="Поиск...">
 			<button class="search-button" type="submit">
 				<img src="img/icons/search.png" height="20" alt="Поиск">
 			</button>
+			<div id="searchResults" class="search-results"></div>
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
-				<a href="discount.html">Скидки</a>
-				<div class="category-drop-down">
+				<a href="discount.php">Скидки</a>
+				<div onclick="showCategories()" class="category-drop-down" id="categoryDropdownTrigger">
 					<span>Категории</span>
-					<div class="dropdown-menu">
-						<a href="catalog.html" class="dropdown-item">Мыши</a>
-						<a href="catalog.html" class="dropdown-item">Клавиатуры</a>
-						<a href="catalog.html" class="dropdown-item">Наушники</a>
-						<a href="catalog.html" class="dropdown-item">Кресла</a>
-						<a href="catalog.html" class="dropdown-item">Мониторы</a>
+					<div class="dropdown-menu" id="dropdown">
+						<?php foreach ($categories as $category): ?>
+							<a href="catalog.php?category=<?= $category['id'] ?>" class="dropdown-item">
+								<?= htmlspecialchars($category['name']) ?>
+							</a>
+						<?php endforeach; ?>
 					</div>
 				</div>
+
 			</div>
-			<div class="action-icons">
-				<div class="favorites-logo">
-					<a href="favorites.html">
+			<?php if (isset($_SESSION['user_id'])): ?>
+				<div class="action-icons">
+					<div class="favorites-logo">
+					<a href="favorites.php">
 						<img src="img/icons/heart_white.png" height="30px">
 					</a>
-				</div>
-				<div class="cart-logo">
-					<a href="cart.html"" class="cart-link">
+					</div>
+					<div class="cart-logo">
+					<a href="cart.php" class="cart-link">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">1</span>
+						<span class="cart-counter"><?= count($cartItems) ?></span>
 					</a>
-				</div>
-				<div class="account-logo">
-					<a href="profile.html" class="account-link">
+					</div>
+					<div class="account-logo">
+					<a href="profile.php?id=<?= $userId ?>" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
-						<span class="account-name">Артём</span>
+						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
+					</div>
 				</div>
-			</div>
+				<?php else: ?>
+				<div class="action-icons">
+					<div class="favorites-logo">
+					<a href="#" onclick="openLoginModal(event)">
+						<img src="img/icons/heart_white.png" height="30px">
+					</a>
+					</div>
+					<div class="cart-logo">
+					<a href="#" class="cart-link" onclick="openLoginModal(event)">
+						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
+						<span class="cart-counter-default">0</span>
+					</a>
+					</div>
+					<div class="account-logo">
+					<a href="#" class="account-link" onclick="openLoginModal(event)">
+						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
+						<span class="account-name">Войти</span>
+					</a>
+					</div>
+				</div>
+			<?php endif; ?>
 		</nav>
 		
 	</header>
@@ -216,6 +260,7 @@ $products = $stmt->fetchAll();
 	<main>
 		<form method="GET" action="catalog.php" id="filterForm">
 			<input type="hidden" name="category" value="<?= htmlspecialchars($categoryId) ?>">
+			<input type="hidden" name="sort" id="sortHiddenInput" value="<?= htmlspecialchars($sort ?? '') ?>">
 			<div class="filter">
 				<div class="price">
 					<span class="price-span">Цена</span>
@@ -258,6 +303,7 @@ $products = $stmt->fetchAll();
 				</div>
 
 				<button type="submit">Применить</button>
+				<button type="button" id="resetFilters">Сбросить</button>
 			</div>
 		</form>
 
@@ -265,14 +311,12 @@ $products = $stmt->fetchAll();
 			<h1 class="favorites-span"><?= htmlspecialchars($categoryName) ?></h1>
 			<div class="sort">
 				<span>Сортировка:</span>
-				<select id="sortSelect" class="sort-select">
-					<option value="" disabled <?= $sort === '' ? 'selected' : '' ?>>Показать сначала</option>
-
+				<select id="sortSelect" name="sort" class="sort-select">
+					<option value="new" <?= empty($sort) ? 'selected' : '' ?>>Новые</option>
 					<option value="cheaper" <?= $sort === 'cheaper' ? 'selected' : '' ?>>Дешевле</option>
 					<option value="expensive" <?= $sort === 'expensive' ? 'selected' : '' ?>>Дороже</option>
 					<option value="high_rate" <?= $sort === 'high_rate' ? 'selected' : '' ?>>Оценка выше</option>
 					<option value="low_rate" <?= $sort === 'low_rate' ? 'selected' : '' ?>>Оценка ниже</option>
-
 				</select>
 			</div>
 			<div class="catalog">
@@ -308,10 +352,10 @@ $products = $stmt->fetchAll();
 								$isInFav = in_array($product['id'], $favItems);
 							?>
 							<div class="card-buttons">
-								<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+								<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 									<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
 								</button>
-								<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+								<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 									<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
 								</button>
 							</div>
@@ -393,12 +437,9 @@ $products = $stmt->fetchAll();
 	</footer>
 	<script src="js/actions.js"></script>
 	<script src="js/sort.js"></script>
-	<script>
-	document.querySelectorAll('#filterForm select, #filterForm input').forEach(el => {
-		el.addEventListener('change', () => {
-			document.getElementById('filterForm').submit();
-		});
-	});
-</script>
+	<script src="js/filter.js"></script>
+	<script src="js/search.js"></script>
+	<script src="js/showCategories.js"></script>
+
 </body>
 </html>

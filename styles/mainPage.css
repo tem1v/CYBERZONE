@@ -10,6 +10,15 @@ body{
 	height: 1000px;
 }
 
+button {
+	cursor: pointer;
+	transition: filter 0.2s ease;
+}
+
+button:hover {
+	filter: brightness(90%);
+}
+
 header{
 	height: 70px;
 	padding-left: 100px;
@@ -85,17 +94,17 @@ header{
 	z-index: 1000;
 	display: none; 
 	
-  }
-  
-  .search-results div {
+}
+
+.search-results div {
 	padding: 8px 12px;
 	cursor: pointer;
 	color: #000;
-  }
-  
-  .search-results div:hover {
+}
+
+.search-results div:hover {
 	background-color: #f0f0f0;
-  }
+}
 
 .navigation{
 	display: flex;

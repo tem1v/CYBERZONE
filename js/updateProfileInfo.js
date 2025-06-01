@@ -54,7 +54,7 @@ document.querySelector(".delete-account-btn").addEventListener("click", function
         location.reload(); // Самый простой способ — перезагрузить страницу
     } else {
         if (confirm("Вы уверены, что хотите выйти?")) {
-            window.location.href = "logout.php"; // ваш обработчик выхода
+            window.location.href = "../server/logout.php"; // ваш обработчик выхода
         }
     }
 });

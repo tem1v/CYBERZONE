@@ -1,6 +1,9 @@
 <?php
 session_start();
 include 'server/db/db.php';
+include 'login-component/login-modal.php';
+
+$isLoggedIn = isset($_SESSION['user_id']);
 
 $searchResults = [];
 $cartItems = [];
@@ -34,6 +37,12 @@ if ($searchQuery === '') {
         $favStmt->execute([$userId]);
         $favItems = $favStmt->fetchAll(PDO::FETCH_COLUMN);
     }
+	$categories = [];
+	$query = $pdo->query("SELECT id, name FROM categories");
+	if ($query) {
+		$categories = $query->fetchAll(PDO::FETCH_ASSOC);
+	}
+	include 'login-component/login-modal.php';
 }
 ?>
 
@@ -44,56 +53,81 @@ if ($searchQuery === '') {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/search-discount.css">
+	<link rel="stylesheet" href="login-component/loginStyle.css">
 	<title>Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
 	<header class="header-container">
 		<div class="logo">
-			<a href="mainPage.html">
+			<a href="mainPage.php">
 				<img src="img/logo/logo.png" alt="" height="40px">
 				<span class="logo-text">CYBERZONE</span>
 			</a>
 		</div>
-		<form action="search.html" class="search-container">
-			<input type="text" class="search-input" placeholder="Поиск...">
+		<form action="search.php" class="search-container" method="GET">
+			<input type="text" name="q" id="searchInput" class="search-input" placeholder="Поиск...">
 			<button class="search-button" type="submit">
 				<img src="img/icons/search.png" height="20" alt="Поиск">
 			</button>
+			<div id="searchResults" class="search-results"></div>
 		</form>
 		<nav class="navigation">
 			<div class="action-words">
-				<a href="discount.html">Скидки</a>
-				<div class="category-drop-down">
+				<a href="discount.php">Скидки</a>
+				<div onclick="showCategories()" class="category-drop-down" id="categoryDropdownTrigger">
 					<span>Категории</span>
-					<div class="dropdown-menu">
-						<a href="catalog.html" class="dropdown-item">Мыши</a>
-						<a href="catalog.html" class="dropdown-item">Клавиатуры</a>
-						<a href="catalog.html" class="dropdown-item">Наушники</a>
-						<a href="catalog.html" class="dropdown-item">Кресла</a>
-						<a href="catalog.html" class="dropdown-item">Мониторы</a>
+					<div class="dropdown-menu" id="dropdown">
+						<?php foreach ($categories as $category): ?>
+							<a href="catalog.php?category=<?= $category['id'] ?>" class="dropdown-item">
+								<?= htmlspecialchars($category['name']) ?>
+							</a>
+						<?php endforeach; ?>
 					</div>
 				</div>
+
 			</div>
-			<div class="action-icons">
-				<div class="favorites-logo">
-					<a href="favorites.html">
+			<?php if (isset($_SESSION['user_id'])): ?>
+				<div class="action-icons">
+					<div class="favorites-logo">
+					<a href="favorites.php">
 						<img src="img/icons/heart_white.png" height="30px">
 					</a>
-				</div>
-				<div class="cart-logo">
-					<a href="cart.html"" class="cart-link">
+					</div>
+					<div class="cart-logo">
+					<a href="cart.php" class="cart-link">
 						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
-						<span class="cart-counter">1</span>
+						<span class="cart-counter"><?= count($cartItems) ?></span>
 					</a>
-				</div>
-				<div class="account-logo">
-					<a href="profile.html" class="account-link">
+					</div>
+					<div class="account-logo">
+					<a href="profile.php?id=<?= $userId ?>" class="account-link">
 						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
-						<span class="account-name">Артём</span>
+						<span class="account-name"><?= htmlspecialchars($_SESSION['first_name'] ?? 'Профиль') ?></span>
 					</a>
+					</div>
 				</div>
-			</div>
+				<?php else: ?>
+				<div class="action-icons">
+					<div class="favorites-logo">
+					<a href="#" onclick="openLoginModal(event)">
+						<img src="img/icons/heart_white.png" height="30px">
+					</a>
+					</div>
+					<div class="cart-logo">
+					<a href="#" class="cart-link" onclick="openLoginModal(event)">
+						<img src="img/icons/shopping-cart_white.png" height="30px" alt="Корзина">
+						<span class="cart-counter-default">0</span>
+					</a>
+					</div>
+					<div class="account-logo">
+					<a href="#" class="account-link" onclick="openLoginModal(event)">
+						<img src="img/icons/user.png" height="30px" alt="Аккаунт">
+						<span class="account-name">Войти</span>
+					</a>
+					</div>
+				</div>
+			<?php endif; ?>
 		</nav>
 		
 	</header>
@@ -126,10 +160,10 @@ if ($searchQuery === '') {
 			</div>
 
 			<div class="card-buttons">
-				<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>">
+				<button type="button" class="add-to-cart" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?> >
 					<img src="img/icons/<?= $isInCart ? 'shopping-cart_green' : 'shopping-cart_black' ?>.png" height="30px">
 				</button>
-				<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>">
+				<button type="button" class="add-to-favorites" data-id="<?= $product['id'] ?>" <?= !$isLoggedIn ? 'onclick="openLoginModal(event)"' : '' ?>>
 					<img src="img/icons/<?= $isInFav ? 'heart_red' : 'heart_black' ?>.png" height="30px">
 				</button>
 			</div>
