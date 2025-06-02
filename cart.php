@@ -10,10 +10,11 @@
 	}
 
 	$stmt = $pdo->prepare("
-		SELECT p.*
-		FROM cart_items c
-		JOIN products p ON c.product_id = p.id
-		WHERE c.user_id = ?
+		SELECT ci.*, p.*
+		FROM cart_items ci
+		JOIN products p ON p.id = ci.product_id
+		WHERE ci.user_id = ?
+		ORDER BY ci.added_at DESC;
 	");
 	$stmt->execute([$userId]);
 	$cartProducts = $stmt->fetchAll();

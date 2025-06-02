@@ -23,10 +23,11 @@
 	}
 
 	$stmt = $pdo->prepare("
-		SELECT p.* 
-		FROM favorites f
-		JOIN products p ON f.product_id = p.id
-		WHERE f.user_id = ?
+		SELECT f.*, p.*
+FROM favorites f
+JOIN products p ON p.id = f.product_id
+WHERE f.user_id = ?
+ORDER BY f.added_at DESC
 	");
 	$stmt->execute([$userId]);
 	$favorites = $stmt->fetchAll();
