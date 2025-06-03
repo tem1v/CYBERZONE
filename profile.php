@@ -22,8 +22,9 @@
 		SELECT o.*, p.name, p.image_path, r.rating
 		FROM orders o
 		JOIN products p ON o.product_id = p.id
-		LEFT JOIN reviews r ON r.product_id = p.id AND r.user_id = o.user_id
+		LEFT JOIN reviews r ON r.product_id = p.id AND r.user_id = o.user_id AND r.order_id = o.id
 		WHERE o.user_id = ?
+		ORDER BY o.ordered_at DESC
 	");
 	$stmt->execute([$userId]);
 	$orders = $stmt->fetchAll();
@@ -168,7 +169,7 @@
 						<h3 class="empty-orders">Вы еще не делали заказов.</h3>
 					<?php else: ?>
 						<?php foreach ($orders as $order): ?>
-							<div class="order-cart" data-product-id="<?= $order['product_id'] ?>">
+							<div class="order-cart" data-product-id="<?= $order['product_id'] ?>" data-order-id="<?= $order['id'] ?>">
 								<a href="goodPage.php?id=<?= $order['product_id'] ?>">
 									<img src="<?= $order['image_path'] ?>" height="220px">
 								</a>

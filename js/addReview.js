@@ -1,8 +1,9 @@
-document.querySelectorAll(".order-cart").forEach(cart => {
+document.querySelectorAll(".order-cart").forEach((cart) => {
     const productId = cart.dataset.productId;
+    const orderId = cart.dataset.orderId; // получаем order_id
     const stars = cart.querySelectorAll(".star-btn");
 
-    stars.forEach(star => {
+    stars.forEach((star) => {
         star.addEventListener("click", () => {
             const rating = star.dataset.rating;
             const comment = prompt("Оставьте комментарий к товару:");
@@ -11,19 +12,21 @@ document.querySelectorAll(".order-cart").forEach(cart => {
                 fetch("server/addReview.php", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
+                        "Content-Type": "application/x-www-form-urlencoded",
                     },
-                    body: `product_id=${productId}&rating=${rating}&comment=${encodeURIComponent(comment)}`
+                    body: `product_id=${productId}&order_id=${orderId}&rating=${rating}&comment=${encodeURIComponent(
+                        comment
+                    )}`,
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Отзыв добавлен!");
-						window.location.reload();
-                    } else {
-                        alert("Ошибка: " + data.message);
-                    }
-                });
+                    .then((res) => res.json())
+                    .then((data) => {
+                        if (data.success) {
+                            alert("Отзыв добавлен!");
+                            window.location.reload();
+                        } else {
+                            alert("Ошибка: " + data.message);
+                        }
+                    });
             }
         });
     });
