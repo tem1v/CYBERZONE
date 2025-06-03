@@ -52,6 +52,7 @@ $stmt = $pdo->prepare("
 
 try {
     $stmt->execute([$firstName, $lastName, $email, $phone, $userId]);
+	$_SESSION['first_name'] = $firstName;
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Ошибка при обновлении данных']);
