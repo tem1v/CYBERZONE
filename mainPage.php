@@ -5,11 +5,11 @@
 	$userId = $_SESSION['user_id'] ?? null;
 	$products = [];
 
-	if ($query = $pdo->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 12")) {
-    	$products = $query->fetchAll(PDO::FETCH_ASSOC);
-	} else {
-		print_r($pdo->errorInfo());
-	}
+	// if ($query = $pdo->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 12")) {
+    // 	$products = $query->fetchAll(PDO::FETCH_ASSOC);
+	// } else {
+	// 	print_r($pdo->errorInfo());
+	// }
 	
 	$categories = [];
 	$query = $pdo->query("SELECT id, name FROM categories");
@@ -46,6 +46,78 @@
 		$index = rand(0, count($discountedProducts) - 1);
 		$dailyProduct = $discountedProducts[$index];
 	}
+
+
+	$userId = $_SESSION['user_id'] ?? null;
+
+if ($userId) {
+    // Получаем любимые категории
+    $stmt = $pdo->prepare("
+        SELECT c.id
+        FROM favorites f
+        JOIN products p ON f.product_id = p.id
+        JOIN categories c ON p.category_id = c.id
+        WHERE f.user_id = ?
+        GROUP BY c.id
+    ");
+    $stmt->execute([$userId]);
+    $favCategories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    if (!empty($favCategories)) {
+        // Формируем плейсхолдеры
+        $placeholders = implode(',', array_fill(0, count($favCategories), '?'));
+
+        // Товары из любимых категорий
+        $stmt1 = $pdo->prepare("
+            SELECT p.*, COUNT(f.product_id) AS fav_count
+            FROM products p
+            LEFT JOIN favorites f ON p.id = f.product_id
+            WHERE p.category_id IN ($placeholders)
+            GROUP BY p.id
+            ORDER BY fav_count DESC
+        ");
+        $stmt1->execute($favCategories);
+        $preferredProducts = $stmt1->fetchAll();
+
+        // Товары из остальных категорий
+        $stmt2 = $pdo->prepare("
+            SELECT p.*, COUNT(f.product_id) AS fav_count
+            FROM products p
+            LEFT JOIN favorites f ON p.id = f.product_id
+            WHERE p.category_id NOT IN ($placeholders)
+            GROUP BY p.id
+            ORDER BY fav_count DESC
+        ");
+        $stmt2->execute($favCategories);
+        $otherProducts = $stmt2->fetchAll();
+
+        // Объединяем: сначала избранные категории, потом остальные
+        $products = array_merge($preferredProducts, $otherProducts);
+    } else {
+        // У пользователя нет избранного — показываем по популярности
+        $stmt = $pdo->query("
+            SELECT p.*, COUNT(f.product_id) AS fav_count
+            FROM products p
+            LEFT JOIN favorites f ON p.id = f.product_id
+            GROUP BY p.id
+            ORDER BY fav_count DESC
+        ");
+        $products = $stmt->fetchAll();
+    }
+} else {
+    // Неавторизованный — просто по популярности
+    $stmt = $pdo->query("
+        SELECT p.*, COUNT(f.product_id) AS fav_count
+        FROM products p
+        LEFT JOIN favorites f ON p.id = f.product_id
+        GROUP BY p.id
+        ORDER BY fav_count DESC
+    ");
+    $products = $stmt->fetchAll();
+}
+
+	
+
 ?>
 
 <!DOCTYPE html>
@@ -171,7 +243,7 @@
 
 			<?php endif; ?>
 		</div>
-		<h1>Новинки</h1>
+		<h1>Рекомендуемое</h1>
 		<div class="catalog">
 		<?php foreach ($products as $product): ?>
 			<div href="goodPage.php?id=<?= $product['id'] ?>" class="card">
