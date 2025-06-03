@@ -16,7 +16,6 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             p.id as product_id,
-            ci.quantity,
             -- Расчёт цены со скидкой
             ROUND(p.price * (1 - IFNULL(p.discount_percent, 0) / 100), 2) AS discounted_price
         FROM cart_items ci

@@ -36,8 +36,8 @@
 		if ($n1 == 1) return $forms[0];
 		return $forms[2];
 	}
-	$totalPrice = 0;        // сумма всех оригинальных цен
-	$totalDiscount = 0;     // сумма всех скидок
+	$totalPrice = 0; 
+	$totalDiscount = 0;     
 
 	foreach ($cartProducts as $product) {
 		$original = $product['price'];
