@@ -34,7 +34,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/search-discount.css">
 	<link rel="stylesheet" href="login-component/loginStyle.css">
-	<title>Cyberzone</title>
+	<title>Скидки | Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
@@ -125,7 +125,9 @@
 				?>
 				<div class="card">
 					<a href="goodPage.php?id=<?= $product['id'] ?>">
-						<img src="<?= $product['image_path'] ?>" height="220px">
+						<div class="card-good-image">
+							<img src="<?= $product['image_path'] ?>" height="220px">
+						</div>
 						<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
 					</a>
 					<div class="card-price-buttons">

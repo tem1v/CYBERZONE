@@ -324,6 +324,21 @@ main{
 	border-radius: 10px;
 }
 
+.order-card-image{
+	border-radius: 10px;
+	width: 220px;
+	height: 220px;
+	display: flex;
+	align-items: center;
+}
+
+.order-card-image img{
+	border-radius: 10px;
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
 .order-info{
 	display: flex;
 	flex-direction: column;

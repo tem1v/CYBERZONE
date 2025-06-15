@@ -55,7 +55,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/profile.css">
-	<title>Cyberzone</title>
+	<title>Профиль | Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
@@ -171,7 +171,9 @@
 						<?php foreach ($orders as $order): ?>
 							<div class="order-cart" data-product-id="<?= $order['product_id'] ?>" data-order-id="<?= $order['id'] ?>">
 								<a href="goodPage.php?id=<?= $order['product_id'] ?>">
-									<img src="<?= $order['image_path'] ?>" height="220px">
+									<div class="order-card-image">
+										<img src="<?= $order['image_path'] ?>" height="220px">
+									</div>
 								</a>
 								<div class="order-info">
 									<span class="order-date"><?= date('d.m.Y', strtotime($order['ordered_at'])) ?></span>

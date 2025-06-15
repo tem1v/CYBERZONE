@@ -247,9 +247,24 @@ main{
 	transition: transform 0.1s ease;
 }
 
-.card img{
+/* .card img{
 	border-radius: 10px;
 	width: 100%;
+} */
+
+.card-good-image{
+	border-radius: 10px;
+	width: 100%;
+	height: 220px;
+	display: flex;
+	align-items: center;
+}
+
+.card-good-image img{
+	border-radius: 10px;
+	max-width: 100%;
+	height: auto;
+	display: block;
 }
 
 .card a{

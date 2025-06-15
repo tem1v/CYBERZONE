@@ -177,7 +177,7 @@ $products = $stmt->fetchAll();
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/catalog.css">
 	<link rel="stylesheet" href="login-component/loginStyle.css">
-	<title>Cyberzone</title>
+	<title><?= htmlspecialchars($categoryName) ?> | Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
@@ -323,7 +323,9 @@ $products = $stmt->fetchAll();
 				<?php foreach ($products as $product): ?>
 					<div href="goodPage.php?id=<?= $product['id'] ?>" class="card">
 						<a href="goodPage.php?id=<?= $product['id'] ?>">
-							<img src="<?= $product['image_path'] ?>" height="220px">
+							<div class="card-good-image">
+								<img src="<?= $product['image_path'] ?>" height="220px">
+							</div>
 							<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
 						</a>
 

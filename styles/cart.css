@@ -345,6 +345,21 @@ main{
 	border-radius: 10px;
 }
 
+.card-good-image{
+	border-radius: 10px;
+	width: 220px;
+	height: 220px;
+	display: flex;
+	align-items: center;
+}
+
+.card-good-image img{
+	border-radius: 10px;
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
 .good-name{
 	margin-top:15px;
 	font-weight: bold;

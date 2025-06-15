@@ -81,7 +81,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/cart.css">
-	<title>Cyberzone</title>
+	<title>Корзина | Cyberzone</title>
 	<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 </head>
 <body>
@@ -172,7 +172,10 @@
 					<?php foreach ($cartProducts as $product): ?>
 						<div class="cart-card">
 							<a href="goodPage.php?id=<?= $product['id'] ?>">
-								<img src="<?= htmlspecialchars($product['image_path']) ?>" height="220px">
+								<div class="card-good-image">
+									<img src="<?= htmlspecialchars($product['image_path']) ?>" height="220px">
+								</div>
+								
 							</a>
 							<span class="good-name"><?= htmlspecialchars($product['name']) ?></span>
 							<div class="cart-good-price">

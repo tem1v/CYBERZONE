@@ -4,7 +4,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" href="loginStyle.css">
-		<title>Document</title>
+		<link rel="shortcut icon" href="img/logo/cyberzone_icon.png">
 	</head>
 	<body>
 		<div id="login-modal" class="modal-overlay" style="display: none;">

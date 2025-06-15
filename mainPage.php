@@ -4,12 +4,6 @@
 	$isLoggedIn = isset($_SESSION['user_id']);
 	$userId = $_SESSION['user_id'] ?? null;
 	$products = [];
-
-	// if ($query = $pdo->query("SELECT * FROM products ORDER BY created_at DESC LIMIT 12")) {
-    // 	$products = $query->fetchAll(PDO::FETCH_ASSOC);
-	// } else {
-	// 	print_r($pdo->errorInfo());
-	// }
 	
 	$categories = [];
 	$query = $pdo->query("SELECT id, name FROM categories");
@@ -248,7 +242,10 @@ if ($userId) {
 		<?php foreach ($products as $product): ?>
 			<div href="goodPage.php?id=<?= $product['id'] ?>" class="card">
 				<a href="goodPage.php?id=<?= $product['id'] ?>">
-					<img src="<?= $product['image_path'] ?>" height="220px">
+					<div class="card-good-image">
+						<img src="<?= $product['image_path'] ?>" height="220px">
+					</div>
+					
 					<span class="card-good-name"><?= htmlspecialchars($product['name']) ?></span>
 				</a>
 
