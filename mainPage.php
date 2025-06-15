@@ -216,7 +216,10 @@ if ($userId) {
 				<div class="daily-good">
 					<span class="daily-good-span">Товар дня</span>
 					<a href="goodPage.php?id=<?= $dailyProduct['id'] ?>">
-						<img src="<?= $dailyProduct['image_path'] ?>" height="220" class="daily-good-photo">
+						<div class="daily-good-image">
+							<img src="<?= $dailyProduct['image_path'] ?>" height="220">
+						</div>
+						
 					</a>
 					<div class="daily-good-description-cart">
 						<a href="goodPage.php?id=<?= $dailyProduct['id'] ?>" class="daily-good-description">

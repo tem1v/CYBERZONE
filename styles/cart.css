@@ -341,9 +341,7 @@ main{
 	margin-bottom: 20px;
 }
 
-.cart-card img{
-	border-radius: 10px;
-}
+
 
 .card-good-image{
 	border-radius: 10px;
@@ -358,6 +356,7 @@ main{
 	max-width: 100%;
 	height: auto;
 	display: block;
+	max-height: 100%;
 }
 
 .good-name{

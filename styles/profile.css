@@ -320,9 +320,6 @@ main{
 	box-sizing: border-box;
 }
 
-.order-cart img{
-	border-radius: 10px;
-}
 
 .order-card-image{
 	border-radius: 10px;
@@ -337,6 +334,7 @@ main{
 	max-width: 100%;
 	height: auto;
 	display: block;
+	max-height: 100%;
 }
 
 .order-info{

@@ -245,7 +245,6 @@ main{
 }
 
 .card-good-image{
-	border-radius: 10px;
 	width: 100%;
 	height: 220px;
 	display: flex;
@@ -257,6 +256,7 @@ main{
 	max-width: 100%;
 	height: auto;
 	display: block;
+	max-height: 100%;
 }
 
 .card a{
